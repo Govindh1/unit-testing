@@ -1,0 +1,180 @@
+<div class="display-flex middle-xs mb-10">
+<!-- IIFL START -->
+    <h4 *ngIf="uploadReportService?.assignedTechnicalManagerData === null" class="ss-form-title mb-0" translate>
+        {{agencyDetails?.agencyType}} - {{commonService.truncateToRequiredLength(agencyDetails?.agencyName,64)}}
+    </h4>
+    <h4 class="ss-form-title mb-10" *ngIf="uploadReportService?.assignedTechnicalManagerData !== null">
+        {{ uploadReportService?.assignedTechnicalManagerData?.userRole + ' - ' +
+          commonService.truncateToRequiredLength(uploadReportService?.assignedTechnicalManagerData?.username,32) }}
+    </h4>
+<!-- IIFL END -->
+    <div class="ss-flex-spacer"></div>
+</div>
+<mat-card class="mb-20">
+    <ng-container *ngIf="!isShowSpinner">
+        <mat-label translate class="file-label">{{'ss-upload-report.docuents_photographs' |
+            translate}}<span class="ss-required-label"> *</span> </mat-label>
+        <div class="mt-5 col-md-12 p-5">
+
+            <input accept="properyPhotograpFileFormats" type="file" class="file-input"
+                (change)="onDocFileSelected(documentFileUpload.files)" #documentFileUpload>
+            <div class="file-upload">
+                <span class="file-name">
+                    {{'ss-upload-report.select_file_upload' | translate}}
+                </span>
+                <span class="PS_Browse upload-ico ml-20" (click)="documentFileUpload.click()"
+                    *ngIf="documentsDataSource?.length !==20"></span>
+                <span class="PS_Browse upload-ico-disable ml-20" *ngIf="documentsDataSource?.length === 20"></span>
+                <span class="PS_Info info-ico ml-20" [matTooltip]="['File format: .jpg, .jpeg, .png, .tiff, .pdf, .doc, .docx',
+                            'Individual file size: 2 MB (maximum)',
+                            'Total file size: 40 MB (maximum)',
+                            'Maximum number of files: 20'] | toolTipPipe" matTooltipClass="tooltip-list"
+                    [ngClass]="{ 'PS_Info': !docInfo, 'PS_Info_Hover': docInfo}">
+                </span>
+                <ng-container [formGroup]="form">
+                    <input class="ml-20 file-input-name" type="text" *ngIf="documentFileName"
+                        formControlName="documentName">
+                </ng-container>
+                <button attr.aria-label="{{'ss-upload-report.upload' | translate}}" mat-raised-button color="primary"
+                    class="ml-20 ss-primary-button" (click)="uploadDocument()"
+                    [disabled]="!documentFileName || isDocFileExceed" id="btn-doc-upload">
+                    {{ 'ss-upload-report.upload' | translate}}
+                </button>
+            </div>
+			<!-- IIFL START -->
+            <mat-error class="mt-10" *ngIf="isDocFileExceed">
+			<!-- IIFL END -->
+                {{'ss-upload-project-documents-validation-message.fileSize' | translate}}
+            </mat-error>
+            <ng-container *ngIf="documentsDataSource.length">
+
+                <div class="table-container mat-elevation-z2 mt-40">
+
+                    <ss-shared-table [tableHook]="tableHook" [tableConfig]="docTableConfig">
+                        <ng-template let-item ssDataColumn="action">
+                            <a attr.aria-label="{{'project-document-upload-list.download' | translate}}"
+                                class="ss-pointer mr-1" (click)="downloadDocument(item.fileId, item.fileName)"
+                                matTooltip="{{'project-document-upload-list.download'| translate}}">
+                                <span class="PS_Download table-icon"></span>
+                            </a>
+                            <a class="ss-pointer" attr.aria-label="{{'ss-upload-report.delete'| translate}}"
+                                (click)="openDeleteDialog(item)" matTooltip="{{'ss-upload-report.delete'| translate}}">
+                                <span class="PS_Delete table-icon"></span>
+                            </a>
+                        </ng-template>
+                    </ss-shared-table>
+                </div>
+            </ng-container>
+
+        </div>
+    </ng-container>
+    <div class="ss-text-center" *ngIf="isShowSpinner">
+        <mat-spinner class="mx-auto"></mat-spinner>
+    </div>
+</mat-card>
+
+<form [formGroup]="form" class="ss-form-primary">
+
+    <mat-card class="mt-10">
+        <ng-container *ngIf="!isAgencyReportShowSpinner">
+            <mat-form-field class="ss-form-field-fluid col-md-4">
+                <mat-label translate>ss-upload-report.feedback</mat-label>
+                <mat-select formControlName="feedback" required>
+                    <mat-option value="Positive">
+                        Positive
+                    </mat-option>
+                    <mat-option value="Negative">
+                        Negative
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="form?.get('feedback')?.hasError('required')">
+                    {{'ss-upload-report-validations.feedBack' | translate}}
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="ss-form-field-fluid col-md-12">
+                <mat-label translate>ss-upload-report.remarks</mat-label>
+                <textarea type="text" formControlName="remarks" matInput maxlength="5000"
+                    (keydown)="keyValueChange($event)" cdkTextareaAutosize cdkAutosizeMinRows="2"></textarea>
+                <mat-error *ngIf="form?.get('remarks')?.hasError('required')">
+                    {{'ss-upload-report-validations.remarks' | translate}}
+                </mat-error>
+            </mat-form-field>
+
+            <div class="mb-5 pt-10 col-md-12">
+                <mat-label translate class="file-label">{{'ss-upload-report.report' | translate}}<span
+                        class="ss-required-label"> *</span>
+                </mat-label>
+                <input #fileUpload type="file" (change)="onReportFileSelected(fileUpload.files)"
+                    accept=".xls,.xlsx,.pdf,.doc,.docx" class="file-input" />
+                <div class="file-upload">
+                    <span class="file-name">
+                        {{'ss-upload-report.select_file_upload' | translate}}
+                    </span>
+                    <span class="PS_Browse upload-ico ml-20" (click)="fileUpload.click()"
+                        *ngIf="!reportsDataSource?.length"></span>
+                    <span class="PS_Browse upload-ico-disable ml-20" *ngIf="reportsDataSource?.length"></span>
+                    <span class="PS_Info info-ico ml-20" [matTooltip]="['File format: .pdf, .doc, .docx, .xls, .xlsx',
+                        'Individual file size: 2 MB (maximum)'] | toolTipPipe" matTooltipClass="tooltip-list"
+                        [ngClass]="{ 'PS_Info': !reportInfo, 'PS_Info_Hover': reportInfo}">
+                    </span>
+                    <input class="ml-20 file-input-name" type="text" formControlName="reportName"
+                        *ngIf="reportFileName">
+                </div>
+				<!-- IIFL START -->
+                <mat-error class="mt-10" *ngIf="isReportFileExceed">
+				<!-- IIFL END -->
+                    {{'ss-upload-project-documents-validation-message.fileSize' | translate}}
+                </mat-error>
+
+                <ng-container *ngIf="reportsDataSource?.length">
+                    <div class="table-container mat-elevation-z2 mt-40">
+                        <ss-shared-table [tableHook]="reportTableHook" [tableConfig]="reportTableConfig">
+                            <ng-template let-item ssDataColumn="action">
+                                <a attr.aria-label="{{'project-document-upload-list.download' | translate}}"
+                                    class="ss-pointer mr-1" (click)="downloadDocument(item.fileId, item.fileName)"
+                                    matTooltip="{{'project-document-upload-list.download'| translate}}">
+                                    <span class="PS_Download table-icon"></span>
+                                </a>
+                                <a class="ss-pointer" attr.aria-label="{{'ss-upload-report.delete'| translate}}"
+                                    (click)="openReportDeleteDialog(item)"
+                                    matTooltip="{{'ss-upload-report.delete'| translate}}">
+                                    <span class="PS_Delete table-icon"></span>
+                                </a>
+                            </ng-template>
+                        </ss-shared-table>
+                    </div>
+                </ng-container>
+            </div>
+        </ng-container>
+        <div class="ss-text-center" *ngIf="isAgencyReportShowSpinner">
+            <mat-spinner class="mx-auto"></mat-spinner>
+        </div>
+    </mat-card>
+
+	<!-- IIFL START -->
+    <div class="display-flex mt-10">
+	<!-- IIFL END -->
+        <div class="ss-flex-spacer"></div>
+        <button (click)="cancel()" mat-raised-button class="ml-10 ss-secondary-button"
+            attr.aria-label="{{'ss-upload-report.cancel'| translate}}" id="btn-cancel">
+            {{ 'ss-upload-report.cancel' | translate}}
+        </button>
+
+<!-- IIFL START -->
+        <button *ngIf="!reportProjectId" attr.aria-label="{{'ss-upload-report.save' | translate}}" mat-raised-button
+            color="primary" class=" ml-10 ss-primary-button"
+            [disabled]="form?.invalid || !documentsDataSource?.length || !reportFileName || isReportFileExceed"
+            (click)="uploadReport()" id="btn-create">
+            {{ 'ss-upload-report.save' | translate}}
+        </button>
+
+        <button *ngIf="reportProjectId" attr.aria-label="{{'ss-upload-report.save' | translate}}" mat-raised-button
+            color="primary" class=" ml-10 ss-primary-button"
+            [disabled]="(form?.invalid || !form?.dirty) || !documentsDataSource?.length || !reportsDataSource?.length"
+            (click)="updateUploadReport()" id="btn-update">
+            {{ 'ss-upload-report.save' | translate}}
+        </button>
+		<!-- IIFL END -->
+    </div>
+</form>

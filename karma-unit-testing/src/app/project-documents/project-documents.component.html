@@ -1,0 +1,161 @@
+<ng-container *ngIf="!isShowSpinner">
+    
+    <ng-container *ngIf="checkScreenMode()">
+
+        <!-- IIFL Code Start -->
+        <div [ngClass]="{'mandatory-doc-container pb-10': showDocList}">
+            <div class="pl-10 pt-5 pb-5" [ngClass]="{'mandatory-doc-show': showDocList, 'mandatory-doc': !showDocList}">
+                <span (click)="showDocumentsList()">
+                    <span class="PS_MandatoryDocuments doc-ico"></span> <span class="doc-label ml-5" translate>ss-upload-project-documents.mandatoryDocuments</span>
+                </span>
+                <span class="PS_Close doc-close-ico mr-10" (click)="hideDocumentsList()" *ngIf="showDocList"></span>
+            </div>
+            <ul *ngIf="showDocList" class="mt-10">
+                <li *ngFor="let doc of docList" class="list-item"> 
+                    <span>{{ commonService.truncateToRequiredLength(doc?.name,128) }}</span>
+                </li>
+            </ul>
+        </div>
+        <!-- IIFL Code End -->
+
+        <form [formGroup]="projectDocumentform" class="ss-form-primary mb-10" enctype="multipart/form-data">
+
+            <mat-card class="mt-10">
+                <div class="mt-5 col-md-12">
+                    <input accept=".pdf, .xls, doc, .xlsx, .docx" type="file" class="file-input"
+                        (change)="onDocumentFileSelected(documentFileUpload.files)" #documentFileUpload>
+                    <div class="file-upload">
+                        <span class="file-name">
+                            {{'ss-upload-project-documents.selectFileUpload' | translate}}
+                        </span>
+                        <span class="PS_Browse upload-ico ml-10" (click)="documentFileUpload.click()"></span>
+                        <span class="PS_Info info-ico ml-10" [matTooltip]="['File format: .pdf, .xls, doc, .xlsx, .docx',
+                        'Individual file size: 2 MB (maximum)',
+                        'Total file size: 40 MB (maximum)',
+                        'Maximum number of files: 20'] | toolTipPipe" matTooltipClass="tooltip-list"
+                            matTooltipPosition="below">
+                        </span>
+
+                        <input class="ml-10 file-input-name" type="text" *ngIf="documentFileName" matInput
+                            formControlName="documentName" maxlength="255">
+
+                    </div>
+                    <mat-error class="mt-10" *ngIf="notificationId === 'ss-upload-document-error'">
+                        {{'ss-upload-project-documents-validation-message.fileSize' | translate}}
+                    </mat-error>
+
+                    <mat-divider class="mt-10 mb-20"></mat-divider>
+
+                    <mat-grid-list class="ss-mat-form-grid-list ss-mat-form-row" [cols]="(isHandset$ | async) ? 1 : 3"
+                        [rowHeight]="(isHandset$ | async) ? '80px' : '70px'">
+
+                        <mat-grid-tile>
+                            <mat-form-field class="ss-form-field-fluid">
+                                <mat-label>{{ 'ss-upload-project-documents.documentType' | translate
+                                    }}</mat-label>
+                                <mat-select ssMatSelectNoSpace formControlName="documentType" disableOptionCentering required>
+                                    <mat-form-field class="ss-form-field-fluid"
+                                        style="height: 55px;padding: 10px 16px;overflow: auto;">
+                                        <input name="points" placeholder="Search" [maxlength]="searchableMaxLength" formControlName="documentTypeSearchTxt"
+                                            matInput type="text">
+                                    </mat-form-field>
+                                    <mat-option class="mat-option-hide" style="height: 0px;width: 0px;"></mat-option>
+                                    <mat-option *ngFor="let documentType of documentTypeArrayOptions"
+                                        [value]="documentType.key">
+                                        {{documentType.value}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="projectDocumentform?.get('documentType')?.hasError('required')">
+                                    {{'ss-upload-project-documents-validation-message.documentTypeMandatory'
+                                    |
+                                    translate}}
+                                </mat-error>
+                            </mat-form-field>
+                        </mat-grid-tile>
+                        <mat-grid-tile>
+                            <mat-form-field class="ss-form-field-fluid">
+                                <mat-label>{{ 'ss-upload-project-documents.fromWhom' | translate
+                                    }}</mat-label>
+                                <input type="text" formControlName="fromWhom" matInput maxlength="255">
+
+                            </mat-form-field>
+                        </mat-grid-tile>
+                        <mat-grid-tile>
+                            <mat-form-field class="ss-form-field-fluid">
+                                <mat-label>{{ 'ss-upload-project-documents.inFavorOf' | translate
+                                    }}</mat-label>
+                                <input type="text" formControlName="inFavorOf" matInput maxlength="255">
+
+                            </mat-form-field>
+                        </mat-grid-tile>
+
+                    </mat-grid-list>
+
+                    <mat-form-field class="ss-form-field-fluid">
+                        <mat-label>{{ 'ss-upload-project-documents.remarks' | translate
+                            }}</mat-label>
+                        <textarea formControlName="remarks" matInput maxlength="5000" cdkTextareaAutosize
+                            cdkAutosizeMinRows="2"></textarea>
+                    </mat-form-field>
+                </div>
+            </mat-card>
+        </form>
+        <div class="display-flex end-md end-lg end-xl end-sm my-10">
+
+            <button mat-raised-button class="ml-10 ss-secondary-button" *ngIf="!editDocument"
+                attr.aria-label="{{'ss-upload-report.cancel'| translate}}" id="btn-cancel"
+                [routerLink]="[dashboardRouterLinks.DASHBOARD]">
+                {{ 'ss-upload-report.cancel' | translate}}
+            </button>
+            <button mat-raised-button class="ml-10 ss-secondary-button" *ngIf="editDocument"
+                attr.aria-label="{{'ss-upload-report.cancel'| translate}}" id="btn-cancel" (click)="cancelEdit()">
+                {{ 'ss-upload-report.cancel' | translate}}
+            </button>
+            <button attr.aria-label="{{'ss-upload-report.save' | translate}}" *ngIf="!editDocument" mat-raised-button
+                color="primary" class=" ml-10 ss-primary-button" (click)="saveDocument()" id="btn-doc-upload"
+                [disabled]="projectDocumentform.invalid || notificationId === 'ss-upload-document-error' || !notificationPin">
+                {{ 'ss-upload-report.save' | translate}}
+            </button>
+            <button attr.aria-label="{{'ss-upload-report.save' | translate}}" *ngIf="editDocument" mat-raised-button
+                color="primary" class=" ml-10 ss-primary-button" (click)="saveDocument()" id="btn-doc-upload-edit"
+                [disabled]="checkFormDisability()">
+                {{ 'ss-upload-report.save' | translate}}
+            </button>
+
+        </div>
+    </ng-container>
+
+    <ss-shared-table [tableHook]="tableHook" [tableConfig]="tableConfig">
+        <ng-template let-item ssDataColumn="action">
+            <a attr.aria-label="{{'project-document-upload-list.visibility' | translate}}"
+                *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.viewProjectDocument, item.actions)"
+                class="ss-pointer mr-1" [routerLink]="getFormattedPath(projectDocumentRouterLinks.VIEW, {id:item.id})"
+                matTooltip="{{'project-document-upload-list.visibility'| translate}}">
+                <span class="PS_View table-icon"></span>
+            </a>
+            <a attr.aria-label="{{'project-document-upload-list.edit' | translate}}"
+                *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.editProjectDocument, item.actions)"
+                class="ss-pointer mr-1" (click)="patchFormValue(item)"
+                matTooltip="{{'project-document-upload-list.edit'| translate}}">
+                <span class="PS_Edit table-icon"></span>
+            </a>
+            <a attr.aria-label="{{'project-document-upload-list.download' | translate}}"
+                *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.donwnloadProjectDocument, item.actions)"
+                class="ss-pointer mr-1" (click)="downloadDocument(item.fileId, item.fileName)"
+                matTooltip="{{'project-document-upload-list.download'| translate}}">
+                <span class="PS_Download table-icon"></span>
+            </a>
+
+            <a attr.aria-label="{{'project-document-upload-list.delete' | translate}}"
+                *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.deleteProjectDocument, item.actions)"
+                class="ss-pointer" (click)="openDeleteDialog(item)"
+                matTooltip="{{'project-document-upload-list.delete'| translate}}">
+                <span class="PS_Delete table-icon"></span>
+            </a>
+        </ng-template>
+    </ss-shared-table>
+</ng-container>
+
+<div class="ss-text-center" *ngIf="isShowSpinner">
+    <mat-spinner class="mx-auto"></mat-spinner>
+</div>

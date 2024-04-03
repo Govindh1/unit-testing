@@ -1,0 +1,175 @@
+<!-- IIFL START-->
+
+    <!-- AGENCY TABLE (OWNER TM)-->
+    <ng-container *ngIf="!isPseudoAgencyLogin">  <!-- IIFL Condition -->
+        <ng-container>
+            <h4 class="ss-form-title mb-10" translate > ss-agency-verification.agencyReports </h4>
+            <ss-shared-table [tableHook]="tableHook" [tableConfig]="tableConfig">
+                <!-- Action column -->
+                <ng-template let-item ssDataColumn="action">
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.viewReport, item.actions)"
+                        class="ss-pointer mr-1" attr.aria-label="{{'ss-agency-verification.view' | translate }}"
+                        matTooltip="{{'ss-agency-verification.view'| translate}}" (click)="goToView(item, 'agency')">
+                        <span class="PS_View table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.reopenAgency, item.actions)"
+                        class="ss-pointer" attr.aria-label="{{'ss-agency-verification.reOpen' | translate }}"
+                        matTooltip="{{'ss-agency-verification.reopen'| translate}}"
+                        (click)="openReopenAgenciesConfirmDialog(item)">
+                        <span class="PS_Reopen table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.addQueryAgencyVerification, item.actions)"
+                        class="ss-pointer mr-1" attr.aria-label="{{'ss-agency-verification.query' | translate }}"
+                        matTooltip="{{'ss-agency-verification.query'| translate}}" (click)="goToQuery(item, 'agency')"
+                        id="btn-query">
+                        <span class="PS_Query table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.uploadReport, item.actions)"
+                        class="ss-pointer mr-1"
+                        attr.aria-label="{{'ss-agency-verification.uploadReports' | translate }}"
+                        matTooltip="{{'ss-agency-verification.uploadReport'| translate}}"
+                        (click)="uploadReport(item, 'agency')">
+                        <span class="PS_Upload-Report table-icon"></span>
+                    </a>
+                    <!-- IIFL START-->
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.previousReport, item.actions)"
+                        class="ss-pointer mr-1"
+                        attr.aria-label="{{'iifl-agency-verification.previousReports' | translate }}"
+                        matTooltip="{{'iifl-agency-verification.previousReports'| translate}}"
+                        (click)="previousReport(item, 'agency')">
+                        <span class="PS_Previous_Reports table-icon"></span>
+                    </a>
+                    <!-- IIFL END-->
+
+                </ng-template>
+            </ss-shared-table>
+        </ng-container>
+    </ng-container>
+
+    <!-- USERS TABLE -->
+    <ng-container *ngIf="userType !== legalManagerUserType && userType !== agencyUserType && tmAssignedList.length !== 0">
+        <h4 class="ss-form-title mb-10" translate *ngIf="tmAssignedList.length && isPseudoAgencyLogin && userType !== agencyUserType" > ss-agency-verification.agencyReports </h4>
+        <div class="mb-10 mt-20">
+            <ss-shared-table [tableHook]="tmTableHook" [tableConfig]="tmTableConfig">
+                <!-- Action column -->
+                <ng-template let-item ssDataColumn="action">
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.viewReport, item.actions)"
+                        class="ss-pointer mr-1" attr.aria-label="{{'ss-agency-verification.view' | translate }}"
+                        matTooltip="{{'ss-agency-verification.view'| translate}}" (click)="goToView(item, 'user')">
+                        <span class="PS_View table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.reopenUser, item.actions)"
+                        class="ss-pointer" attr.aria-label="{{'ss-agency-verification.reOpen' | translate }}"
+                        matTooltip="{{'ss-agency-verification.reopen'| translate}}"
+                        (click)="openReopenAgenciesConfirmDialog(item)">
+                        <span class="PS_Reopen table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.addQueryAgencyVerification, item.actions)"
+                        class="ss-pointer mr-1" attr.aria-label="{{'ss-agency-verification.query' | translate }}"
+                        matTooltip="{{'ss-agency-verification.query'| translate}}" (click)="goToQuery(item, 'user')"
+                        id="btn-query">
+                        <span class="PS_Query table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.uploadReport, item.actions)"
+                        class="ss-pointer mr-1"
+                        attr.aria-label="{{'ss-agency-verification.uploadReports' | translate }}"
+                        matTooltip="{{'ss-agency-verification.uploadReport'| translate}}"
+                        (click)="uploadReport(item, 'user')">
+                        <span class="PS_Upload-Report table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.previousReport, item.actions)"
+                        class="ss-pointer mr-1"
+                        attr.aria-label="{{'iifl-agency-verification.previousReports' | translate }}"
+                        matTooltip="{{'iifl-agency-verification.previousReports'| translate}}"
+                        (click)="previousReport(item, 'TM')">
+                        <span class="PS_Previous_Reports table-icon"></span>
+                    </a>
+
+                </ng-template>
+            </ss-shared-table>
+        </div>
+    </ng-container>
+
+
+    <h4 class="ss-form-title mb-10 mt-20" *ngIf="subsequentReportData.length || subsequentTmAssignedList.length" translate>
+        ss-agency-verification.subsequentValuationReports
+    </h4>
+    <!-- AGENCY TABLE(OWNER TM) -->
+    <ng-container *ngIf="!isPseudoAgencyLogin">
+        <ng-container *ngIf="subsequentReportData.length">
+            <ss-shared-table [tableHook]="subsequentTableHook" [tableConfig]="tableConfig">
+                <ng-template let-item ssDataColumn="action">
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.viewReport, item.actions)"
+                        class="ss-pointer mr-1" attr.aria-label="{{'ss-agency-verification.view' | translate }}"
+                        [routerLink]="getFormattedPath(UPDATE_REPORT_VIEW, { id: item.id })"
+                        matTooltip="{{'ss-agency-verification.view'| translate}}">
+                        <span class="PS_View table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.reopenAgency, item.actions)"
+                        class="ss-pointer" attr.aria-label="{{'ss-agency-verification.reOpen' | translate }}"
+                        matTooltip="{{'ss-agency-verification.reopen'| translate}}"
+                        (click)="openReopenAgenciesConfirmDialog(item)">
+                        <span class="PS_Reopen table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.addQueryAgencyVerification, item.actions)"
+                        class="ss-pointer mr-1" attr.aria-label="{{'ss-agency-verification.query' | translate }}"
+                        (click)="goToQuery(item, 'agency')" matTooltip="{{'ss-agency-verification.query'| translate}}">
+                        <span class="PS_Query table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.uploadReport, item.actions)"
+                        class="ss-pointer mr-1"
+                        attr.aria-label="{{'ss-agency-verification.uploadReports' | translate }}"
+                        matTooltip="{{'ss-agency-verification.uploadReport'| translate}}"
+                        (click)="uploadReport(item , 'agency')">
+                        <span class="PS_Upload-Report table-icon"></span>
+                    </a>
+
+                </ng-template>
+            </ss-shared-table>
+        </ng-container>
+    </ng-container>
+
+    <!-- USERS TABLE -->
+    <ng-container *ngIf="userType !== legalManagerUserType && userType !== agencyUserType && subsequentTmAssignedList.length !== 0">
+        <div class="mb-10 mt-20">
+            <ss-shared-table [tableHook]="subsequentUsersTableHook" [tableConfig]="subsequentUsersTableConfig">
+                <!-- Action column -->
+                <ng-template let-item ssDataColumn="action">
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.viewReport, item.actions)"
+                        class="ss-pointer mr-1" attr.aria-label="{{'ss-agency-verification.view' | translate }}"
+                        matTooltip="{{'ss-agency-verification.view'| translate}}" (click)="goToView(item, 'user')">
+                        <span class="PS_View table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.reopenUser, item.actions)"
+                        class="ss-pointer" attr.aria-label="{{'ss-agency-verification.reOpen' | translate }}"
+                        matTooltip="{{'ss-agency-verification.reopen'| translate}}"
+                        (click)="openReopenAgenciesConfirmDialog(item)">
+                        <span class="PS_Reopen table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.addQueryAgencyVerification, item.actions)"
+                        class="ss-pointer mr-1" attr.aria-label="{{'ss-agency-verification.query' | translate }}"
+                        matTooltip="{{'ss-agency-verification.query'| translate}}" (click)="goToQuery(item, 'user')"
+                        id="btn-query">
+                        <span class="PS_Query table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.uploadReport, item.actions)"
+                        class="ss-pointer mr-1"
+                        attr.aria-label="{{'ss-agency-verification.uploadReports' | translate }}"
+                        matTooltip="{{'ss-agency-verification.uploadReport'| translate}}"
+                        (click)="uploadReport(item, 'user')">
+                        <span class="PS_Upload-Report table-icon"></span>
+                    </a>
+                    <a *ngIf="checkTableActionEntitlement(screenEntitlementCodes.tableActions.previousReport, item.actions)"
+                        class="ss-pointer mr-1"
+                        attr.aria-label="{{'iifl-agency-verification.previousReports' | translate }}"
+                        matTooltip="{{'iifl-agency-verification.previousReports'| translate}}"
+                        (click)="previousReport(item, 'user')">
+                        <span class="PS_Previous_Reports table-icon"></span>
+                    </a>
+
+                </ng-template>
+            </ss-shared-table>
+        </div>
+    </ng-container>
+
+<!-- IIFL END-->

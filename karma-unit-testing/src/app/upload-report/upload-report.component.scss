@@ -1,0 +1,33 @@
+.file-input {
+  display: none;
+}
+
+.upload-ico-disable {
+// IIFL START
+  font-size: 45px;
+  // IIFL END
+  color: var(--ss-button-primary-bg-disabled-color);
+  cursor: not-allowed;
+}
+
+.file-name {
+  font-size: 16px;
+}
+
+.file-label {
+  color: var(--ss-c11);
+}
+
+.file-input-name {
+  padding: 10px 15px;
+  border-radius: 5px;
+}
+
+.tooltip-list {
+  white-space: pre-line !important;
+}
+
+::ng-deep .mat-tooltip {
+  white-space: pre-line !important;
+  max-width: unset !important;
+}
